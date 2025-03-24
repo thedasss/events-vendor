@@ -12,6 +12,9 @@ import EventsList from "./Components/EventsList"; // Import the EventsList compo
 import Vendor from "./Components/vendor"; // Corrected import name
 import VendorsList from "./Components/VendorList"; // Import the VendorsList component
 import UpdateVendor from "./Components/UpdateVendor"; // Adjust the path if needed
+import Staff from "./Components/Staff/Staff"; // Import the Staff component
+import StaffList from "./Components/Staff/StaffList"; // Import the StaffList component
+import UpdateStaff from "./Components/Staff/UpdateStaff"; // Import the UpdateStaff component
 
 
 function App() {
@@ -27,6 +30,11 @@ function App() {
           <Route path="/vendor" element={<Vendor />} /> {/* Corrected component name */}        
           <Route path="/vendors" element={<VendorsList />} /> {/* Updated path for vendors */}
           <Route path="/Update-vendor/:id" element={<UpdateVendor />} /> {/* Updated path for updating vendor */}
+
+          {/* Staff management routes */}
+          <Route path="/staff" element={<Staff />} /> {/* Add the staff route */}
+          <Route path="/update-staff/:id" element={<UpdateStaff />} /> {/* Update staff route */}
+          <Route path="/staff-list" element={<StaffList />} /> {/* Staff list route */}
         </Routes>
       </div>
     </Router>
