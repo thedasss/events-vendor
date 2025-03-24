@@ -24,7 +24,7 @@ function App() {
           <Route path="/events" element={<EventsList />} />
           <Route path="/update-event/:id" element={<UpdateEvent />} />
 
-          <Route path="/vendor" element={<Vendor />} /> {/* Corrected component name */}npm -v          
+          <Route path="/vendor" element={<Vendor />} /> {/* Corrected component name */}        
           <Route path="/vendors" element={<VendorsList />} /> {/* Updated path for vendors */}
           <Route path="/Update-vendor/:id" element={<UpdateVendor />} /> {/* Updated path for updating vendor */}
         </Routes>
