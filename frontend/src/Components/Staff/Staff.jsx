@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Staff = () => {
   const [staffData, setStaffData] = useState({
@@ -13,51 +13,88 @@ const Staff = () => {
     notes: ''
   });
 
+  // Instead of just storing event types, we'll store the entire events array
+  const [events, setEvents] = useState([]);
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState({});
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const navigate = useNavigate();
 
+  // Fetch events from the server
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/events');
+        if (response.ok) {
+          const data = await response.json();
+          // data should be an array of event objects: [{ _id, eventType, eventDate, ... }, ...]
+          setEvents(data);
+        } else {
+          console.error('Error fetching events');
+        }
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+    fetchEvents();
+  }, []);
+
+  // Validate form fields
   const validateForm = () => {
     let newErrors = {};
-
     if (!staffData.fullName) newErrors.fullName = 'Full name is required.';
-    if (!staffData.phoneNumber) newErrors.phoneNumber = 'Phone number is required.';
-    else if (!/^\d{10}$/.test(staffData.phoneNumber)) newErrors.phoneNumber = 'Phone number must be 10 digits.';
-    
-    if (!staffData.email) newErrors.email = 'Email is required.';
-    else if (!/\S+@\S+\.\S+/.test(staffData.email)) newErrors.email = 'Email is not valid.';
-    
+    if (!staffData.phoneNumber) {
+      newErrors.phoneNumber = 'Phone number is required.';
+    } else if (!/^\d{10}$/.test(staffData.phoneNumber)) {
+      newErrors.phoneNumber = 'Phone number must be 10 digits.';
+    }
+
+    if (!staffData.email) {
+      newErrors.email = 'Email is required.';
+    } else if (!/\S+@\S+\.\S+/.test(staffData.email)) {
+      newErrors.email = 'Email is not valid.';
+    }
+
     if (!staffData.role) newErrors.role = 'Role is required.';
-    
-    if (!staffData.salary) newErrors.salary = 'Salary is required.';
-    else if (staffData.salary <= 0) newErrors.salary = 'Salary must be a positive number.';
-    
-    if (!staffData.joiningDate) newErrors.joiningDate = 'Joining date is required.';
-    
+
+    if (!staffData.salary) {
+      newErrors.salary = 'Salary is required.';
+    } else if (staffData.salary <= 0) {
+      newErrors.salary = 'Salary must be a positive number.';
+    }
+
+    if (!staffData.joiningDate) {
+      newErrors.joiningDate = 'Joining date is required.';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle single field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setStaffData(prevState => ({
+    setStaffData((prevState) => ({
       ...prevState,
-      [name]: name === "salary" ? Number(value) : value
+      [name]: name === 'salary' ? Number(value) : value
     }));
   };
 
+  // Handle multi-select changes (for assignedEvents)
   const handleMultiSelectChange = (e) => {
     const { options } = e.target;
-    const selectedEvents = [];
+    const selectedEventIds = [];
     for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) selectedEvents.push(options[i].value);
+      if (options[i].selected) {
+        selectedEventIds.push(options[i].value);
+      }
     }
-    setStaffData(prevState => ({
+    setStaffData((prevState) => ({
       ...prevState,
-      assignedEvents: selectedEvents
+      assignedEvents: selectedEventIds
     }));
   };
 
+  // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -86,7 +123,8 @@ const Staff = () => {
           notes: ''
         });
         setErrors({});
-        navigate('/staff-list'); // Navigate to the staff list page on successful form submission
+        // Navigate to staff list or any other page
+        navigate('/staff-list');
       } else {
         setMessage(result.error || '❌ Error adding staff member');
       }
@@ -102,7 +140,9 @@ const Staff = () => {
       <form onSubmit={handleSubmit}>
         {/* Full Name */}
         <div className="mb-4">
-          <label htmlFor="fullName" className="block text-lg font-medium text-gray-700">Full Name:</label>
+          <label htmlFor="fullName" className="block text-lg font-medium text-gray-700">
+            Full Name:
+          </label>
           <input
             type="text"
             id="fullName"
@@ -111,14 +151,16 @@ const Staff = () => {
             onChange={handleChange}
             placeholder="Enter full name"
             required
-            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md"
           />
           {errors.fullName && <p className="text-red-500 mt-2 text-sm">{errors.fullName}</p>}
         </div>
 
         {/* Phone Number */}
         <div className="mb-4">
-          <label htmlFor="phoneNumber" className="block text-lg font-medium text-gray-700">Phone Number:</label>
+          <label htmlFor="phoneNumber" className="block text-lg font-medium text-gray-700">
+            Phone Number:
+          </label>
           <input
             type="number"
             id="phoneNumber"
@@ -127,14 +169,16 @@ const Staff = () => {
             onChange={handleChange}
             placeholder="Enter phone number"
             required
-            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md"
           />
           {errors.phoneNumber && <p className="text-red-500 mt-2 text-sm">{errors.phoneNumber}</p>}
         </div>
 
         {/* Email */}
         <div className="mb-4">
-          <label htmlFor="email" className="block text-lg font-medium text-gray-700">Email:</label>
+          <label htmlFor="email" className="block text-lg font-medium text-gray-700">
+            Email:
+          </label>
           <input
             type="email"
             id="email"
@@ -143,52 +187,67 @@ const Staff = () => {
             onChange={handleChange}
             placeholder="Enter email"
             required
-            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md"
           />
           {errors.email && <p className="text-red-500 mt-2 text-sm">{errors.email}</p>}
         </div>
 
         {/* Role */}
         <div className="mb-4">
-          <label htmlFor="role" className="block text-lg font-medium text-gray-700">Role:</label>
+          <label htmlFor="role" className="block text-lg font-medium text-gray-700">
+            Role:
+          </label>
           <select
             id="role"
             name="role"
             value={staffData.role}
             onChange={handleChange}
             required
-            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Select Role</option>
-            <option value="manager">Manager</option>
-            <option value="coordinator">Coordinator</option>
-            <option value="assistant">Assistant</option>
+            <option value="Manager">Manager</option>
+            <option value="Coordinator">Coordinator</option>
+            <option value="Assistant">Assistant</option>
+            <option value="Supervisor">Supervisor</option>
           </select>
           {errors.role && <p className="text-red-500 mt-2 text-sm">{errors.role}</p>}
         </div>
 
         {/* Assigned Events (Multi-Select) */}
         <div className="mb-4">
-          <label htmlFor="assignedEvents" className="block text-lg font-medium text-gray-700">Assigned Events:</label>
+          <label htmlFor="assignedEvents" className="block text-lg font-medium text-gray-700">
+            Assigned Events:
+          </label>
           <select
             id="assignedEvents"
             name="assignedEvents"
             multiple
             value={staffData.assignedEvents}
             onChange={handleMultiSelectChange}
-            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md"
           >
-            <option value="event1">Event 1</option>
-            <option value="event2">Event 2</option>
-            <option value="event3">Event 3</option>
-            <option value="event4">Event 4</option>
+            {events.length > 0 ? (
+              events.map((event) => (
+                <option key={event._id} value={event._id}>
+                  {/* You can display the eventType or any other property */}
+                  {event.eventType}
+                </option>
+              ))
+            ) : (
+              <option disabled>No events available</option>
+            )}
           </select>
-          {errors.assignedEvents && <p className="text-red-500 mt-2 text-sm">{errors.assignedEvents}</p>}
+          {errors.assignedEvents && (
+            <p className="text-red-500 mt-2 text-sm">{errors.assignedEvents}</p>
+          )}
         </div>
 
         {/* Salary */}
         <div className="mb-4">
-          <label htmlFor="salary" className="block text-lg font-medium text-gray-700">Salary ($):</label>
+          <label htmlFor="salary" className="block text-lg font-medium text-gray-700">
+            Salary ($):
+          </label>
           <input
             type="number"
             id="salary"
@@ -197,14 +256,16 @@ const Staff = () => {
             onChange={handleChange}
             placeholder="Enter salary"
             required
-            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md"
           />
           {errors.salary && <p className="text-red-500 mt-2 text-sm">{errors.salary}</p>}
         </div>
 
         {/* Joining Date */}
         <div className="mb-4">
-          <label htmlFor="joiningDate" className="block text-lg font-medium text-gray-700">Joining Date:</label>
+          <label htmlFor="joiningDate" className="block text-lg font-medium text-gray-700">
+            Joining Date:
+          </label>
           <input
             type="date"
             id="joiningDate"
@@ -212,26 +273,32 @@ const Staff = () => {
             value={staffData.joiningDate}
             onChange={handleChange}
             required
-            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md"
           />
           {errors.joiningDate && <p className="text-red-500 mt-2 text-sm">{errors.joiningDate}</p>}
         </div>
 
         {/* Notes */}
         <div className="mb-4">
-          <label htmlFor="notes" className="block text-lg font-medium text-gray-700">Notes:</label>
+          <label htmlFor="notes" className="block text-lg font-medium text-gray-700">
+            Notes:
+          </label>
           <textarea
             id="notes"
             name="notes"
             value={staffData.notes}
             onChange={handleChange}
             placeholder="Enter any additional notes"
-            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md"
           />
           {errors.notes && <p className="text-red-500 mt-2 text-sm">{errors.notes}</p>}
         </div>
 
-        <button type="submit" className="mt-4 w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="mt-4 w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
           Submit
         </button>
       </form>

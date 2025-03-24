@@ -1,3 +1,4 @@
+// routes/staffRoutes.js
 const express = require('express');
 const Staff = require('../models/Staff');
 
@@ -17,7 +18,8 @@ router.post('/', async (req, res) => {
 // 📌 Get all staff members
 router.get('/', async (req, res) => {
   try {
-    const staff = await Staff.find().populate('assignedEvents'); // Populating event details
+    // Populate event details based on the assignedEvents array of ObjectIds
+    const staff = await Staff.find().populate('assignedEvents');
     res.json(staff);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -38,13 +40,16 @@ router.get('/:id', async (req, res) => {
 // 📌 Update a staff member
 router.put('/:id', async (req, res) => {
   try {
-    const updatedStaff = await Staff.findByIdAndUpdate(req.params.id, req.body, { 
-      new: true, 
-      runValidators: true 
-    }).populate('assignedEvents');
+    const updatedStaff = await Staff.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { 
+        new: true, 
+        runValidators: true 
+      }
+    ).populate('assignedEvents');
 
     if (!updatedStaff) return res.status(404).json({ message: 'Staff member not found' });
-
     res.json(updatedStaff);
   } catch (err) {
     res.status(400).json({ error: err.message });
