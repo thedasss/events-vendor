@@ -99,7 +99,7 @@ doc.text(title, x, y);
   });
 
   // Save PDF
-  doc.save("Filtered_Event_Report.pdf");
+  doc.save("Event_Report.pdf");
 };
 
 

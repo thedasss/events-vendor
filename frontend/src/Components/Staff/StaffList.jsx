@@ -4,6 +4,8 @@ import axios from "axios";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { IoSearch } from "react-icons/io5";
 import { FiPrinter } from "react-icons/fi";
+import { jsPDF } from "jspdf";
+import autoTable from 'jspdf-autotable';
 
 const StaffList = () => {
   const [staff, setStaff] = useState([]);
@@ -12,14 +14,7 @@ const StaffList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [roles] = useState(['Manager', 'Coordinator', 'Technician', 'Assistant']); // Role options
   const [newStaff, setNewStaff] = useState({
-    fullName: '',
-    phoneNumber: '',
-    email: '',
-    role: '',
-    assignedEvents: [],
-    salary: '',
-    joiningDate: '',
-    notes: ''
+   
   });
   const navigate = useNavigate();
 
@@ -49,27 +44,6 @@ const StaffList = () => {
     navigate(`/update-staff/${id}`);
   };
 
-  // Handle form submission for new staff
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('http://localhost:3000/api/staff', newStaff);
-      setStaff([...staff, response.data]);
-      setNewStaff({
-        fullName: '',
-        phoneNumber: '',
-        email: '',
-        role: '',
-        assignedEvents: [],
-        salary: '',
-        joiningDate: '',
-        notes: ''
-      });
-    } catch (err) {
-      alert("Error adding staff: " + err.message);
-    }
-  };
-
   const handleChange = (e) => {
     const { name, value, options } = e.target;
     // For multiple select, handle selected options
@@ -96,7 +70,65 @@ const StaffList = () => {
 
   // Function to generate report (e.g., printing the page)
   const generateReport = () => {
-    window.print();
+    if (!staff || staff.length === 0) {
+      alert("No data available to generate the report.");
+      return;
+    }
+  
+    // Use filteredStaff to filter by searchTerm
+    const filteredStaff = staff.filter((member) =>
+      member.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  
+    if (filteredStaff.length === 0) {
+      alert("No staff found matching the search term.");
+      return;
+    }
+  
+    const doc = new jsPDF();
+  
+    // Set title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+  
+    // Calculate the width of the text for centering
+    const title = "Staff Report";
+    const titleWidth = doc.getTextWidth(title);
+  
+    // Calculate the x position to center the text
+    const x = (doc.internal.pageSize.width - titleWidth) / 2;
+  
+    // Set y position (you can adjust it to your preference)
+    const y = 20;
+  
+    // Add centered title
+    doc.text(title, x, y);
+  
+    // Define table headers
+    const tableHeaders = [["Full Name", "Role", "Phone", "Email", "Joining Date"]];
+  
+    // Define table data for filtered staff
+    const tableData = filteredStaff.map(member => [
+      member.fullName,
+      member.role,
+      member.phoneNumber,
+      member.email,
+      new Date(member.joiningDate).toLocaleDateString() // Format the joining date
+    ]);
+  
+    // Add table using autoTable
+    autoTable(doc, {
+      startY: 30,
+      head: tableHeaders,
+      body: tableData,
+      theme: "grid",
+      styles: { fontSize: 12, cellPadding: 5 },
+      headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [240, 240, 240] }
+    });
+  
+    // Save the PDF with the name "Staff_Report.pdf"
+    doc.save("Staff_Report.pdf");
   };
 
   if (loading) return <p className="text-center mt-4">Loading staff...</p>;
@@ -122,113 +154,6 @@ const StaffList = () => {
           <FiPrinter className="me-2" /> Generate Report
         </button>
       </div>
-
-      {/* Add New Staff Form */}
-      <form onSubmit={handleSubmit} className="mb-4">
-        <h3>Add New Staff</h3>
-        <div className="form-group">
-          <label htmlFor="fullName">Full Name</label>
-          <input
-            type="text"
-            id="fullName"
-            name="fullName"
-            className="form-control"
-            value={newStaff.fullName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="phoneNumber">Phone Number</label>
-          <input
-            type="text"
-            id="phoneNumber"
-            name="phoneNumber"
-            className="form-control"
-            value={newStaff.phoneNumber}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            className="form-control"
-            value={newStaff.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="role">Role</label>
-          <select
-            id="role"
-            name="role"
-            className="form-control"
-            value={newStaff.role}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select role</option>
-            {roles.map((role) => (
-              <option key={role} value={role}>{role}</option>
-            ))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label htmlFor="assignedEvents">Assigned Events</label>
-          <select
-            id="assignedEvents"
-            name="assignedEvents"
-            className="form-control"
-            multiple
-            value={newStaff.assignedEvents}
-            onChange={handleChange}
-          >
-            {/* Add dynamic event options here */}
-          </select>
-        </div>
-        <div className="form-group">
-          <label htmlFor="salary">Salary</label>
-          <input
-            type="number"
-            id="salary"
-            name="salary"
-            className="form-control"
-            value={newStaff.salary}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="joiningDate">Joining Date</label>
-          <input
-            type="date"
-            id="joiningDate"
-            name="joiningDate"
-            className="form-control"
-            value={newStaff.joiningDate}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="notes">Notes</label>
-          <textarea
-            id="notes"
-            name="notes"
-            className="form-control"
-            value={newStaff.notes}
-            onChange={handleChange}
-          ></textarea>
-        </div>
-        <button type="submit" className="btn btn-primary mt-3">
-          Submit
-        </button>
-      </form>
 
       {filteredStaff.map((member) => (
         <div key={member._id} className="card mb-3 shadow-sm">
