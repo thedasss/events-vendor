@@ -2,7 +2,16 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Box, Button, FormControl, Input, InputLabel, Typography, Grid, FormHelperText } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormControl,
+  Input,
+  InputLabel,
+  Typography,
+  Grid,
+  FormHelperText,
+} from "@mui/material";
 
 const titleSx = {
   fontSize: "25px",
@@ -46,7 +55,9 @@ const UpdateVendor = () => {
   const navigate = useNavigate();
   const [vendorData, setVendorData] = useState({
     vendorName: "",
-    contact: "",
+    contactPerson: "",
+    contactNumber: "",
+    serviceType: "",
     email: "",
     address: "",
     contactName: "",
@@ -65,46 +76,53 @@ const UpdateVendor = () => {
       .get(`http://localhost:3000/api/vendors/${id}`)
       .then((response) => {
         if (response.data) {
-          setVendorData(response.data);  // Ensure that the data exists before setting it
+          // Convert serviceType array to comma-separated string if necessary
+          const fetchedData = {
+            ...response.data,
+            serviceType: Array.isArray(response.data.serviceType)
+              ? response.data.serviceType.join(", ")
+              : response.data.serviceType,
+          };
+          setVendorData(fetchedData);
           setLoading(false);
         }
       })
       .catch((err) => {
-        console.error("Error fetching vendor details:", err);  // Debugging
-        setError(err.message);  // Handle errors
+        console.error("Error fetching vendor details:", err);
+        setError(err.message);
         setLoading(false);
       });
   }, [id]);
 
   const validateForm = () => {
     let validationErrors = {};
-    
+
     if (!vendorData.vendorName.trim()) {
       validationErrors.vendorName = "Vendor name is required";
     }
-
-    if (!vendorData.contact.trim()) {
-      validationErrors.contact = "Contact number is required";
+    if (!vendorData.contactPerson.trim()) {
+      validationErrors.contactPerson = "Contact person is required";
     }
-
+    if (!vendorData.contactNumber.trim()) {
+      validationErrors.contactNumber = "Contact number is required";
+    }
+    if (!vendorData.serviceType.trim()) {
+      validationErrors.serviceType = "Service type is required";
+    }
     if (!vendorData.email.trim()) {
       validationErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(vendorData.email)) {
       validationErrors.email = "Email is not valid";
     }
-
     if (!vendorData.address.trim()) {
       validationErrors.address = "Address is required";
     }
-
     if (!vendorData.contactName.trim()) {
       validationErrors.contactName = "Contact name is required";
     }
-
     if (!vendorData.paymentTerms.trim()) {
       validationErrors.paymentTerms = "Payment terms are required";
     }
-
     if (!vendorData.pricingDetails.trim()) {
       validationErrors.pricingDetails = "Pricing details are required";
     }
@@ -123,25 +141,35 @@ const UpdateVendor = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!validateForm()) return;
-  
+
     try {
-      await axios.put(`http://localhost:3000/api/vendors/${id}`, vendorData);
+      // Convert serviceType from comma separated string to an array
+      const updatedData = {
+        ...vendorData,
+        serviceType: vendorData.serviceType.split(",").map((s) => s.trim()),
+      };
+
+      await axios.put(`http://localhost:3000/api/vendors/${id}`, updatedData);
       setMessage("✅ Vendor updated successfully!");
       setTimeout(() => navigate("/vendors"), 1500);
     } catch (err) {
       setError("❌ Error updating vendor: " + err.message);
     }
   };
-  
+
   if (loading) return <p>Loading vendor details...</p>;
   if (error) return <p>Error: {error}</p>;
 
   return (
     <Box sx={boxSX} className="container mt-5 p-4 bg-white rounded-lg shadow-lg">
       <Typography sx={titleSx}>Update Vendor</Typography>
-      {message && <p className="container flex justify-between items-start mr-20 mb-10">{message}</p>}
+      {message && (
+        <p className="container flex justify-between items-start mr-20 mb-10">
+          {message}
+        </p>
+      )}
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={6}>
@@ -154,19 +182,37 @@ const UpdateVendor = () => {
                 onChange={handleChange}
                 required
               />
-              {errors.vendorName && <FormHelperText>{errors.vendorName}</FormHelperText>}
+              {errors.vendorName && (
+                <FormHelperText>{errors.vendorName}</FormHelperText>
+              )}
             </FormControl>
 
-            <FormControl sx={formSX} error={!!errors.contact}>
-              <InputLabel style={label}>Contact Number</InputLabel>
+            <FormControl sx={formSX} error={!!errors.contactPerson}>
+              <InputLabel style={label}>Contact Person</InputLabel>
               <Input
                 style={inputSx}
-                name="contact"
-                value={vendorData.contact}
+                name="contactPerson"
+                value={vendorData.contactPerson}
                 onChange={handleChange}
                 required
               />
-              {errors.contact && <FormHelperText>{errors.contact}</FormHelperText>}
+              {errors.contactPerson && (
+                <FormHelperText>{errors.contactPerson}</FormHelperText>
+              )}
+            </FormControl>
+
+            <FormControl sx={formSX} error={!!errors.contactNumber}>
+              <InputLabel style={label}>Contact Number</InputLabel>
+              <Input
+                style={inputSx}
+                name="contactNumber"
+                value={vendorData.contactNumber}
+                onChange={handleChange}
+                required
+              />
+              {errors.contactNumber && (
+                <FormHelperText>{errors.contactNumber}</FormHelperText>
+              )}
             </FormControl>
           </Grid>
 
@@ -181,7 +227,9 @@ const UpdateVendor = () => {
                 onChange={handleChange}
                 required
               />
-              {errors.email && <FormHelperText>{errors.email}</FormHelperText>}
+              {errors.email && (
+                <FormHelperText>{errors.email}</FormHelperText>
+              )}
             </FormControl>
 
             <FormControl sx={formSX} error={!!errors.address}>
@@ -193,14 +241,104 @@ const UpdateVendor = () => {
                 onChange={handleChange}
                 required
               />
-              {errors.address && <FormHelperText>{errors.address}</FormHelperText>}
+              {errors.address && (
+                <FormHelperText>{errors.address}</FormHelperText>
+              )}
+            </FormControl>
+
+            <FormControl sx={formSX} error={!!errors.contactName}>
+              <InputLabel style={label}>Contact Name</InputLabel>
+              <Input
+                style={inputSx}
+                name="contactName"
+                value={vendorData.contactName}
+                onChange={handleChange}
+                required
+              />
+              {errors.contactName && (
+                <FormHelperText>{errors.contactName}</FormHelperText>
+              )}
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={6}>
+            <FormControl sx={formSX} error={!!errors.paymentTerms}>
+              <InputLabel style={label}>Payment Terms</InputLabel>
+              <Input
+                style={inputSx}
+                name="paymentTerms"
+                value={vendorData.paymentTerms}
+                onChange={handleChange}
+                required
+              />
+              {errors.paymentTerms && (
+                <FormHelperText>{errors.paymentTerms}</FormHelperText>
+              )}
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={6}>
+            <FormControl sx={formSX} error={!!errors.pricingDetails}>
+              <InputLabel style={label}>Pricing Details</InputLabel>
+              <Input
+                style={inputSx}
+                name="pricingDetails"
+                value={vendorData.pricingDetails}
+                onChange={handleChange}
+                required
+              />
+              {errors.pricingDetails && (
+                <FormHelperText>{errors.pricingDetails}</FormHelperText>
+              )}
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12}>
+            <FormControl sx={formSX} error={!!errors.serviceType}>
+              <InputLabel style={label}>
+                Service Type (comma separated)
+              </InputLabel>
+              <Input
+                style={inputSx}
+                name="serviceType"
+                value={vendorData.serviceType}
+                onChange={handleChange}
+                required
+              />
+              {errors.serviceType && (
+                <FormHelperText>{errors.serviceType}</FormHelperText>
+              )}
             </FormControl>
           </Grid>
         </Grid>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-          <Button sx={{ fontSize: "12px", bgcolor: "red", fontWeight: "bold", width: '150px', height: '40px' }} variant="contained" onClick={() => navigate("/")}>Cancel</Button>
-          <Button sx={{ fontSize: "12px", bgcolor: "green", fontWeight: "bold", width: '150px', height: '40px' }} variant="contained" type="submit">UPDATE VENDOR</Button>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+          <Button
+            sx={{
+              fontSize: "12px",
+              bgcolor: "red",
+              fontWeight: "bold",
+              width: "150px",
+              height: "40px",
+            }}
+            variant="contained"
+            onClick={() => navigate("/")}
+          >
+            Cancel
+          </Button>
+          <Button
+            sx={{
+              fontSize: "12px",
+              bgcolor: "green",
+              fontWeight: "bold",
+              width: "150px",
+              height: "40px",
+            }}
+            variant="contained"
+            type="submit"
+          >
+            UPDATE VENDOR
+          </Button>
         </Box>
       </form>
     </Box>
