@@ -8,6 +8,7 @@ import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 
 const StaffList = () => {
+  const [event, setEvents] = useState([]);
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -163,6 +164,9 @@ const StaffList = () => {
               <p className="card-text">Role: {member.role}</p>
               <p className="card-text">Phone: {member.phoneNumber}</p>
               <p className="card-text">Email: {member.email}</p>
+              <p className="card-text">Notes: {member.notes}</p>
+              <p className="card-text">Salary: {member.salary}</p>
+              <p className="card-text">Assigned Events: {event.eventType}</p>
               <p className="text-muted">Joined: {new Date(member.joiningDate).toLocaleString()}</p>
             </div>
             <div>

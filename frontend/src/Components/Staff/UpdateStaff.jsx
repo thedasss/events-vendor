@@ -1,59 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css";
-import {
-  Box,
-  Button,
-  FormControl,
-  Input,
-  InputLabel,
-  Typography,
-  Grid,
-  FormHelperText,
-  Select,
-  MenuItem,
-  Checkbox,
-  ListItemText,
-  TextareaAutosize
-} from "@mui/material";
-
-const titleSx = {
-  fontSize: "25px",
-  color: "black",
-  fontFamily: "Arvo",
-  fontWeight: "bold",
-  marginTop: "4px",
-};
-
-const formSX = {
-  width: "100%",
-  padding: "25px 20px",
-  marginTop: "10px",
-};
-
-const label = {
-  color: "#26bb3a",
-  fontSize: "20px",
-  fontFamily: "Arvo",
-};
-
-const boxSX = {
-  bgcolor: "#FFFFFF",
-  width: "550px",
-  borderRadius: "25px",
-  textAlign: "center",
-  px: "10px",
-  padding: "5px 18px",
-};
-
-const inputSx = {
-  color: "#000000",
-  fontSize: "16px",
-  fontFamily: "Arvo",
-  height: "40px",
-  marginTop: "10px",
-};
+import "tailwindcss/tailwind.css";
 
 const UpdateStaff = () => {
   const { id } = useParams();
@@ -146,7 +94,7 @@ const UpdateStaff = () => {
     try {
       await axios.put(`http://localhost:3000/api/staff/${id}`, staffData);
       setMessage("✅ Staff updated successfully!");
-      setTimeout(() => navigate("/staff"), 1500); // Navigate to staff page after 1.5 seconds
+      setTimeout(() => navigate("/staff-list"), 1500); // Navigate to staff page after 1.5 seconds
     } catch (err) {
       setError("❌ Error updating staff: " + err.message);
     }
@@ -156,146 +104,151 @@ const UpdateStaff = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <Box sx={boxSX} className="container mt-5 p-4 bg-white rounded-lg shadow-lg">
-      <Typography sx={titleSx}>Update Staff</Typography>
-      {message && <p className="container flex justify-between items-start mr-20 mb-10">{message}</p>}
-      <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <FormControl sx={formSX} error={!!errors.fullName}>
-              <InputLabel style={label}>Full Name</InputLabel>
-              <Input
-                style={inputSx}
-                name="fullName"
-                value={staffData.fullName}
-                onChange={handleChange}
-                required
-              />
-              {errors.fullName && <FormHelperText>{errors.fullName}</FormHelperText>}
-            </FormControl>
+    <div className="container mx-auto mt-10 p-8 bg-white rounded-lg shadow-lg max-w-4xl">
+      <h2 className="text-3xl font-bold text-center text-gray-900 mb-6">Update Staff</h2>
+      {message && <p className="text-green-500 text-center mb-4">{message}</p>}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Full Name */}
+          <div className="form-control">
+            <label className="block text-lg text-green-600 font-semibold">Full Name</label>
+            <input
+              type="text"
+              name="fullName"
+              value={staffData.fullName}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            />
+            {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
+          </div>
 
-            <FormControl sx={formSX} error={!!errors.phoneNumber}>
-              <InputLabel style={label}>Phone Number</InputLabel>
-              <Input
-                style={inputSx}
-                name="phoneNumber"
-                value={staffData.phoneNumber}
-                onChange={handleChange}
-                required
-              />
-              {errors.phoneNumber && <FormHelperText>{errors.phoneNumber}</FormHelperText>}
-            </FormControl>
+          {/* Phone Number */}
+          <div className="form-control">
+            <label className="block text-lg text-green-600 font-semibold">Phone Number</label>
+            <input
+              type="text"
+              name="phoneNumber"
+              value={staffData.phoneNumber}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            />
+            {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber}</p>}
+          </div>
 
-            <FormControl sx={formSX} error={!!errors.email}>
-              <InputLabel style={label}>Email</InputLabel>
-              <Input
-                style={inputSx}
-                name="email"
-                value={staffData.email}
-                onChange={handleChange}
-                required
-              />
-              {errors.email && <FormHelperText>{errors.email}</FormHelperText>}
-            </FormControl>
+          {/* Email */}
+          <div className="form-control">
+            <label className="block text-lg text-green-600 font-semibold">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={staffData.email}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            />
+            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+          </div>
 
-            <FormControl sx={formSX} error={!!errors.role}>
-              <InputLabel style={label}>Role</InputLabel>
-              <Select
-                style={inputSx}
-                name="role"
-                value={staffData.role}
-                onChange={handleChange}
-                required
-              >
-                <MenuItem value="manager">Manager</MenuItem>
-                <MenuItem value="coordinator">Coordinator</MenuItem>
-                <MenuItem value="staff">Staff</MenuItem>
-                <MenuItem value="other">Other</MenuItem>
-              </Select>
-              {errors.role && <FormHelperText>{errors.role}</FormHelperText>}
-            </FormControl>
-          </Grid>
+          {/* Role */}
+          <div className="form-control">
+            <label className="block text-lg text-green-600 font-semibold">Role</label>
+            <select
+              name="role"
+              value={staffData.role}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            >
+              <option value="manager">Manager</option>
+              <option value="coordinator">Coordinator</option>
+              <option value="staff">Staff</option>
+              <option value="other">Other</option>
+            </select>
+            {errors.role && <p className="text-red-500 text-sm">{errors.role}</p>}
+          </div>
+        </div>
 
-          <Grid item xs={6}>
-            <FormControl sx={formSX}>
-              <InputLabel style={label}>Assigned Events</InputLabel>
-              <Select
-                multiple
-                style={inputSx}
-                name="assignedEvents"
-                value={staffData.assignedEvents}
-                onChange={handleMultiSelectChange}
-              >
-                {events.map((event) => (
-                  <MenuItem key={event.id} value={event.id}>
-                    <Checkbox checked={staffData.assignedEvents.includes(event.id)} />
-                    <ListItemText primary={event.eventType} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+        {/* Assigned Events */}
+        <div className="form-control">
+          <label className="block text-lg text-green-600 font-semibold">Assigned Events</label>
+          <select
+            multiple
+            name="assignedEvents"
+            value={staffData.assignedEvents}
+            onChange={handleMultiSelectChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            {events.map((event) => (
+              <option key={event.id} value={event.id}>
+                {event.eventType}
+              </option>
+            ))}
+          </select>
+        </div>
 
-            <FormControl sx={formSX} error={!!errors.salary}>
-              <InputLabel style={label}>Salary</InputLabel>
-              <Input
-                style={inputSx}
-                type="number"
-                name="salary"
-                value={staffData.salary}
-                onChange={handleChange}
-                required
-              />
-              {errors.salary && <FormHelperText>{errors.salary}</FormHelperText>}
-            </FormControl>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Salary */}
+          <div className="form-control">
+            <label className="block text-lg text-green-600 font-semibold">Salary</label>
+            <input
+              type="number"
+              name="salary"
+              value={staffData.salary}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            />
+            {errors.salary && <p className="text-red-500 text-sm">{errors.salary}</p>}
+          </div>
 
-            <FormControl sx={formSX} error={!!errors.joiningDate}>
-              <InputLabel style={label}>Joining Date</InputLabel>
-              <Input
-                style={inputSx}
-                type="date"
-                name="joiningDate"
-                value={staffData.joiningDate}
-                onChange={handleChange}
-                required
-              />
-              {errors.joiningDate && <FormHelperText>{errors.joiningDate}</FormHelperText>}
-            </FormControl>
-          </Grid>
+          {/* Joining Date */}
+          <div className="form-control">
+            <label className="block text-lg text-green-600 font-semibold">Joining Date</label>
+            <input
+              type="date"
+              name="joiningDate"
+              value={staffData.joiningDate}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            />
+            {errors.joiningDate && <p className="text-red-500 text-sm">{errors.joiningDate}</p>}
+          </div>
+        </div>
 
-          <Grid item xs={12}>
-            <FormControl sx={formSX} error={!!errors.notes}>
-              <InputLabel style={label}>Notes</InputLabel>
-              <TextareaAutosize
-                style={inputSx}
-                name="notes"
-                value={staffData.notes}
-                onChange={handleChange}
-                required
-                minRows={3}
-              />
-              {errors.notes && <FormHelperText>{errors.notes}</FormHelperText>}
-            </FormControl>
-          </Grid>
-        </Grid>
+        {/* Notes */}
+        <div className="form-control">
+          <label className="block text-lg text-green-600 font-semibold">Notes</label>
+          <textarea
+            name="notes"
+            value={staffData.notes}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            rows={4}
+            required
+          />
+          {errors.notes && <p className="text-red-500 text-sm">{errors.notes}</p>}
+        </div>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-          <Button
-            sx={{ fontSize: "12px", bgcolor: "red", fontWeight: "bold", width: '150px', height: '40px' }}
-            variant="contained"
-            onClick={() => navigate("/staff")}
+        <div className="flex justify-between mt-6">
+          <button
+            type="button"
+            onClick={() => navigate("/staff-list")}
+            className="bg-red-500 text-white py-2 px-6 rounded-md text-lg font-semibold"
           >
             Cancel
-          </Button>
-
-          <Button
-            sx={{ fontSize: "12px", bgcolor: "green", fontWeight: "bold", width: '150px', height: '40px' }}
-            variant="contained"
-            type="submit">
-            UPDATE STAFF
-          </Button>
-        </Box>
+          </button>
+          <button
+            type="submit"
+            className="bg-green-500 text-white py-2 px-6 rounded-md text-lg font-semibold"
+          >
+            Update Staff
+          </button>
+        </div>
       </form>
-    </Box>
+    </div>
   );
 };
 
