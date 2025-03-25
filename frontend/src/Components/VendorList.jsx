@@ -18,14 +18,9 @@ const VendorList = () => {
     axios
       .get("http://localhost:3000/api/vendors")
       .then((response) => {
-        if (response.data) {
-          console.log("Fetched Vendors:", response.data); // Debugging
-          setVendors(response.data);
-          setLoading(false);
-        } else {
-          setError("No vendors found.");
-          setLoading(false);
-        }
+        console.log("Fetched Vendors:", response.data); // Check here
+        setVendors(response.data);
+        setLoading(false);
       })
       .catch((err) => {
         console.error("Error fetching vendors:", err);
@@ -34,6 +29,7 @@ const VendorList = () => {
       });
   }, []);
   
+
 
   const handleDelete = async (id) => {
     try {
@@ -47,23 +43,24 @@ const VendorList = () => {
   const handleUpdate = (id) => {
     navigate(`/update-vendor/${id}`);
   };
+
   const generateReport = () => {
     if (!vendors || vendors.length === 0) {
       alert("No data available to generate the report.");
       return;
     }
-  
+
     const filteredVendors = vendors.filter((vendor) =>
       vendor.vendorName?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  
+
     if (filteredVendors.length === 0) {
       alert("No vendors found matching the search term.");
       return;
     }
-  
+
     const doc = new jsPDF("p", "mm", "a4");
-  
+
     // Center the title
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
@@ -71,22 +68,24 @@ const VendorList = () => {
     const pageWidth = doc.internal.pageSize.width;
     const titleWidth = doc.getTextWidth(title);
     doc.text(title, (pageWidth - titleWidth) / 2, 20);
-  
+
     // Define table headers
     const tableHeaders = [
       ["Vendor Name", "Contact Name", "Email", "Services Provided", "Pricing Details", "Payment Terms"]
     ];
-  
+
     // Define table data
     const tableData = filteredVendors.map((vendor) => [
       vendor.vendorName || "N/A",
       vendor.contactName || "N/A",
       vendor.email || "N/A",
-      Array.isArray(vendor.servicesProvided) ? vendor.servicesProvided.join(", ") : "N/A",
+      Array.isArray(vendor.servicesProvided) && vendor.servicesProvided.length > 0
+        ? vendor.servicesProvided.join(", ")
+        : "N/A", // Check for services array
       vendor.pricingDetails || "N/A",
       vendor.paymentTerms || "N/A" // Ensure "Payment Terms" is included
     ]);
-  
+
     // Adjust table styles
     autoTable(doc, {
       startY: 30,
@@ -106,10 +105,10 @@ const VendorList = () => {
       },
       margin: { left: 10, right: 10 } // Ensure content fits within the page
     });
-  
+
     doc.save("Vendor_Management_Report.pdf");
   };
-  
+
   const filteredVendors = vendors.filter((vendor) =>
     vendor.vendorName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -143,29 +142,30 @@ const VendorList = () => {
       ) : (
         filteredVendors.map((vendor) => (
           <div key={vendor._id} className="card mb-3 shadow-sm">
-            <div className="card-body d-flex justify-content-between align-items-center">
-              <div>
-                <h5 className="card-title">{vendor.vendorName || "N/A"}</h5>
-                <p className="card-text">Contact: {vendor.contactName || "N/A"}</p>
-                <p className="card-text">Email: {vendor.email || "N/A"}</p>
-                <p className="card-text">Services: {Array.isArray(vendor.servicesProvided) ? vendor.servicesProvided.join(", ") : "N/A"}</p>
-                <p className="card-text">Pricing: {vendor.pricingDetails || "N/A"}</p>
-                <p className="card-text">Payment Terms: {vendor.paymentTerms || "N/A"}</p>
-              </div>
-              <div>
-                <button onClick={() => handleUpdate(vendor._id)} className="btn btn-primary me-2">
-                  Update
-                </button>
-                <button onClick={() => handleDelete(vendor._id)} className="btn btn-danger">
-                  Delete
-                </button>
-              </div>
+          <div className="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <h5 className="card-title">{vendor.vendorName || "N/A"}</h5>
+              <p className="card-text">Contact: {vendor.contactName || "N/A"}</p>
+              <p className="card-text">Email: {vendor.email || "N/A"}</p>
+              <p className="card-text">Services: {Array.isArray(vendor.servicesProvided) && vendor.servicesProvided.length > 0 ? vendor.servicesProvided.join(", ") : "N/A"}</p>
+              <p className="card-text">Pricing: {vendor.pricingDetails || "N/A"}</p>
+              <p className="card-text">Payment Terms: {vendor.paymentTerms || "N/A"}</p>
+            </div>
+            <div>
+              <button onClick={() => handleUpdate(vendor._id)} className="btn btn-primary me-2">
+                Update
+              </button>
+              <button onClick={() => handleDelete(vendor._id)} className="btn btn-danger">
+                Delete
+              </button>
             </div>
           </div>
+        </div>
         ))
       )}
     </div>
   );
 };
+
 
 export default VendorList;

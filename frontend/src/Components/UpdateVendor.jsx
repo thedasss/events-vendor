@@ -2,53 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-import {
-  Box,
-  Button,
-  FormControl,
-  Input,
-  InputLabel,
-  Typography,
-  Grid,
-  FormHelperText,
-} from "@mui/material";
-
-const titleSx = {
-  fontSize: "25px",
-  color: "black",
-  fontFamily: "Arvo",
-  fontWeight: "bold",
-  marginTop: "4px",
-};
-
-const formSX = {
-  width: "100%",
-  padding: "25px 20px",
-  marginTop: "10px",
-};
-
-const label = {
-  color: "#26bb3a",
-  fontSize: "20px",
-  fontFamily: "Arvo",
-};
-
-const boxSX = {
-  bgcolor: "#FFFFFF",
-  width: "550px",
-  borderRadius: "25px",
-  textAlign: "center",
-  px: "10px",
-  padding: "5px 18px",
-};
-
-const inputSx = {
-  color: "#000000",
-  fontSize: "16px",
-  fontFamily: "Arvo",
-  height: "40px",
-  marginTop: "10px",
-};
 
 const UpdateVendor = () => {
   const { id } = useParams();
@@ -76,12 +29,12 @@ const UpdateVendor = () => {
       .get(`http://localhost:3000/api/vendors/${id}`)
       .then((response) => {
         if (response.data) {
-          // Convert serviceType array to comma-separated string if necessary
+          // Ensure serviceType has a default value if empty or undefined
           const fetchedData = {
             ...response.data,
             serviceType: Array.isArray(response.data.serviceType)
               ? response.data.serviceType.join(", ")
-              : response.data.serviceType,
+              : response.data.serviceType || "N/A", // Default to "N/A" if empty
           };
           setVendorData(fetchedData);
           setLoading(false);
@@ -92,7 +45,7 @@ const UpdateVendor = () => {
         setError(err.message);
         setLoading(false);
       });
-  }, [id]);
+  }, [id]);  
 
   const validateForm = () => {
     let validationErrors = {};
@@ -145,7 +98,7 @@ const UpdateVendor = () => {
     if (!validateForm()) return;
 
     try {
-      // Convert serviceType from comma separated string to an array
+      // Convert serviceType from comma-separated string to an array
       const updatedData = {
         ...vendorData,
         serviceType: vendorData.serviceType.split(",").map((s) => s.trim()),
@@ -163,185 +116,165 @@ const UpdateVendor = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <Box sx={boxSX} className="container mt-5 p-4 bg-white rounded-lg shadow-lg">
-      <Typography sx={titleSx}>Update Vendor</Typography>
+    <div className="container mt-5 p-4 bg-white rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold text-black mb-4">Update Vendor</h2>
       {message && (
-        <p className="container flex justify-between items-start mr-20 mb-10">
-          {message}
-        </p>
+        <p className="text-center text-green-600 mb-4">{message}</p>
       )}
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <FormControl sx={formSX} error={!!errors.vendorName}>
-              <InputLabel style={label}>Vendor Name</InputLabel>
-              <Input
-                style={inputSx}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-lg font-semibold text-green-600">Vendor Name</label>
+              <input
+                type="text"
                 name="vendorName"
                 value={vendorData.vendorName}
                 onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg"
                 required
               />
               {errors.vendorName && (
-                <FormHelperText>{errors.vendorName}</FormHelperText>
+                <p className="text-red-600 text-sm">{errors.vendorName}</p>
               )}
-            </FormControl>
+            </div>
 
-            <FormControl sx={formSX} error={!!errors.contactPerson}>
-              <InputLabel style={label}>Contact Person</InputLabel>
-              <Input
-                style={inputSx}
+            <div>
+              <label className="block text-lg font-semibold text-green-600">Contact Person</label>
+              <input
+                type="text"
                 name="contactPerson"
                 value={vendorData.contactPerson}
                 onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg"
                 required
               />
               {errors.contactPerson && (
-                <FormHelperText>{errors.contactPerson}</FormHelperText>
+                <p className="text-red-600 text-sm">{errors.contactPerson}</p>
               )}
-            </FormControl>
+            </div>
 
-            <FormControl sx={formSX} error={!!errors.contactNumber}>
-              <InputLabel style={label}>Contact Number</InputLabel>
-              <Input
-                style={inputSx}
+            <div>
+              <label className="block text-lg font-semibold text-green-600">Contact Number</label>
+              <input
+                type="text"
                 name="contactNumber"
                 value={vendorData.contactNumber}
                 onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg"
                 required
               />
               {errors.contactNumber && (
-                <FormHelperText>{errors.contactNumber}</FormHelperText>
+                <p className="text-red-600 text-sm">{errors.contactNumber}</p>
               )}
-            </FormControl>
-          </Grid>
+            </div>
 
-          <Grid item xs={6}>
-            <FormControl sx={formSX} error={!!errors.email}>
-              <InputLabel style={label}>Email</InputLabel>
-              <Input
-                style={inputSx}
+            <div>
+              <label className="block text-lg font-semibold text-green-600">Email</label>
+              <input
                 type="email"
                 name="email"
                 value={vendorData.email}
                 onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg"
                 required
               />
               {errors.email && (
-                <FormHelperText>{errors.email}</FormHelperText>
+                <p className="text-red-600 text-sm">{errors.email}</p>
               )}
-            </FormControl>
+            </div>
 
-            <FormControl sx={formSX} error={!!errors.address}>
-              <InputLabel style={label}>Address</InputLabel>
-              <Input
-                style={inputSx}
+            <div>
+              <label className="block text-lg font-semibold text-green-600">Address</label>
+              <input
+                type="text"
                 name="address"
                 value={vendorData.address}
                 onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg"
                 required
               />
               {errors.address && (
-                <FormHelperText>{errors.address}</FormHelperText>
+                <p className="text-red-600 text-sm">{errors.address}</p>
               )}
-            </FormControl>
+            </div>
 
-            <FormControl sx={formSX} error={!!errors.contactName}>
-              <InputLabel style={label}>Contact Name</InputLabel>
-              <Input
-                style={inputSx}
+            <div>
+              <label className="block text-lg font-semibold text-green-600">Contact Name</label>
+              <input
+                type="text"
                 name="contactName"
                 value={vendorData.contactName}
                 onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg"
                 required
               />
               {errors.contactName && (
-                <FormHelperText>{errors.contactName}</FormHelperText>
+                <p className="text-red-600 text-sm">{errors.contactName}</p>
               )}
-            </FormControl>
-          </Grid>
+            </div>
+          </div>
 
-          <Grid item xs={6}>
-            <FormControl sx={formSX} error={!!errors.paymentTerms}>
-              <InputLabel style={label}>Payment Terms</InputLabel>
-              <Input
-                style={inputSx}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-lg font-semibold text-green-600">Payment Terms</label>
+              <select
                 name="paymentTerms"
                 value={vendorData.paymentTerms}
                 onChange={handleChange}
-                required
-              />
-              {errors.paymentTerms && (
-                <FormHelperText>{errors.paymentTerms}</FormHelperText>
-              )}
-            </FormControl>
-          </Grid>
+                className="w-full p-3 border border-gray-300 rounded-lg"
+              >
+                <option value="">Select Payment Term</option>
+                <option value="Net 30">Net 30</option>
+                <option value="Net 60">Net 60</option>
+                <option value="Prepaid">Prepaid</option>
+              </select>
+            </div>
 
-          <Grid item xs={6}>
-            <FormControl sx={formSX} error={!!errors.pricingDetails}>
-              <InputLabel style={label}>Pricing Details</InputLabel>
-              <Input
-                style={inputSx}
+            <div>
+              <label className="block text-lg font-semibold text-green-600">Pricing Details</label>
+              <input
+                type="text"
                 name="pricingDetails"
                 value={vendorData.pricingDetails}
                 onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg"
                 required
               />
               {errors.pricingDetails && (
-                <FormHelperText>{errors.pricingDetails}</FormHelperText>
+                <p className="text-red-600 text-sm">{errors.pricingDetails}</p>
               )}
-            </FormControl>
-          </Grid>
+            </div>
 
-          <Grid item xs={12}>
-            <FormControl sx={formSX} error={!!errors.serviceType}>
-              <InputLabel style={label}>
-                Service Type (comma separated)
-              </InputLabel>
-              <Input
-                style={inputSx}
-                name="serviceType"
-                value={vendorData.serviceType}
-                onChange={handleChange}
-                required
-              />
-              {errors.serviceType && (
-                <FormHelperText>{errors.serviceType}</FormHelperText>
-              )}
-            </FormControl>
-          </Grid>
-        </Grid>
-
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-          <Button
-            sx={{
-              fontSize: "12px",
-              bgcolor: "red",
-              fontWeight: "bold",
-              width: "150px",
-              height: "40px",
-            }}
-            variant="contained"
-            onClick={() => navigate("/")}
+           {/* Service Provided */}
+        <div className="mb-4">
+          <label className="block">Service Provided:</label>
+          <select
+            name="serviceType"
+            value={vendorData.serviceType}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 mt-2"
           >
-            Cancel
-          </Button>
-          <Button
-            sx={{
-              fontSize: "12px",
-              bgcolor: "green",
-              fontWeight: "bold",
-              width: "150px",
-              height: "40px",
-            }}
-            variant="contained"
+            <option value="">Select Service Type</option>
+            <option value="Delivery">Delivery</option>
+            <option value="Repair">Repair</option>
+            <option value="Installation">Installation</option>
+          </select>
+          {errors.serviceType && <p className="text-red-500 text-sm">{errors.serviceType}</p>}
+        </div>
+          </div>
+        </div>
+
+        <div className="mt-6 text-center">
+          <button
             type="submit"
+            className="px-6 py-3 text-white bg-green-600 rounded-lg hover:bg-green-700"
           >
-            UPDATE VENDOR
-          </Button>
-        </Box>
+            Update Vendor
+          </button>
+        </div>
       </form>
-    </Box>
+    </div>
   );
 };
 

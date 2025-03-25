@@ -8,35 +8,49 @@ const Vendor = () => {
     contactNumber: "",
     email: "",
     address: "",
-    serviceType: [],
+    serviceType: "",
     paymentTerms: "",
     pricingDetails: "",
     contactName: ""
   });
 
   const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const validateEmail = (email) => {
+    const standardEmailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const gmailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    return standardEmailPattern.test(email) || gmailPattern.test(email);
+  };
 
-    if (type === "checkbox") {
-      setVendorData((prevState) => ({
-        ...prevState,
-        serviceType: checked
-          ? [...prevState.serviceType, value]
-          : prevState.serviceType.filter((service) => service !== value),
-      }));
-    } else {
-      setVendorData((prevState) => ({
-        ...prevState,
-        [name]: value,
-      }));
-    }
+  const handleChange = (e) => {
+    const { name, value, type } = e.target;
+
+    setVendorData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    let validationErrors = {};
+    
+    // Service Type validation
+    if (!vendorData.serviceType) {
+      validationErrors.serviceType = "Service Type is required.";
+    }
+
+    // Email validation
+    if (!validateEmail(vendorData.email)) {
+      validationErrors.email = "Please enter a valid email address (either generic or Gmail).";
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
 
     try {
       const response = await fetch('http://localhost:3000/api/vendors', {
@@ -54,7 +68,7 @@ const Vendor = () => {
           contactNumber: "",
           email: "",
           address: "",
-          serviceType: [],
+          serviceType: "",
           paymentTerms: "",
           pricingDetails: "",
           contactName: ""
@@ -119,6 +133,7 @@ const Vendor = () => {
             onChange={handleChange}
             className="w-full border px-3 py-2"
           />
+          {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
         </div>
 
         {/* Address */}
@@ -136,38 +151,18 @@ const Vendor = () => {
         {/* Service Provided */}
         <div className="mb-4">
           <label className="block">Service Provided:</label>
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                name="serviceType"
-                value="Delivery"
-                checked={vendorData.serviceType.includes("Delivery")}
-                onChange={handleChange}
-              />{" "}
-              Delivery
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="serviceType"
-                value="Repair"
-                checked={vendorData.serviceType.includes("Repair")}
-                onChange={handleChange}
-              />{" "}
-              Repair
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="serviceType"
-                value="Installation"
-                checked={vendorData.serviceType.includes("Installation")}
-                onChange={handleChange}
-              />{" "}
-              Installation
-            </label>
-          </div>
+          <select
+            name="serviceType"
+            value={vendorData.serviceType}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 mt-2"
+          >
+            <option value="">Select Service Type</option>
+            <option value="Delivery">Delivery</option>
+            <option value="Repair">Repair</option>
+            <option value="Installation">Installation</option>
+          </select>
+          {errors.serviceType && <p className="text-red-500 text-sm">{errors.serviceType}</p>}
         </div>
 
         {/* Payment Terms */}
