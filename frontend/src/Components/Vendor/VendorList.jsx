@@ -18,9 +18,14 @@ const VendorList = () => {
     axios
       .get("http://localhost:3000/api/vendors")
       .then((response) => {
-        console.log("Fetched Vendors:", response.data); // Check here
-        setVendors(response.data);
-        setLoading(false);
+        if (response.data) {
+          console.log("Fetched Vendors:", response.data); // Debugging
+          setVendors(response.data);
+          setLoading(false);
+        } else {
+          setError("No vendors found.");
+          setLoading(false);
+        }
       })
       .catch((err) => {
         console.error("Error fetching vendors:", err);
@@ -29,7 +34,6 @@ const VendorList = () => {
       });
   }, []);
   
-
 
   const handleDelete = async (id) => {
     try {
@@ -59,54 +63,35 @@ const VendorList = () => {
       return;
     }
 
-    const doc = new jsPDF("p", "mm", "a4");
-
-    // Center the title
+    const doc = new jsPDF();
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
+
     const title = "Vendor Management Report";
-    const pageWidth = doc.internal.pageSize.width;
-    const titleWidth = doc.getTextWidth(title);
-    doc.text(title, (pageWidth - titleWidth) / 2, 20);
+    doc.text(title, doc.internal.pageSize.width / 2, 20, { align: "center" });
 
-    // Define table headers
-    const tableHeaders = [
-      ["Vendor Name", "Contact Name", "Email", "Services Provided", "Pricing Details", "Payment Terms"]
-    ];
+    const tableHeaders = [["Vendor Name", "Contact Name", "Email", "Services Provided", "Pricing Details", "Payment Terms"]];
 
-    // Define table data
     const tableData = filteredVendors.map((vendor) => [
       vendor.vendorName || "N/A",
       vendor.contactName || "N/A",
       vendor.email || "N/A",
-      Array.isArray(vendor.servicesProvided) && vendor.servicesProvided.length > 0
-        ? vendor.servicesProvided.join(", ")
-        : "N/A", // Check for services array
+      Array.isArray(vendor.servicesProvided) ? vendor.servicesProvided.join(", ") : "N/A",
       vendor.pricingDetails || "N/A",
-      vendor.paymentTerms || "N/A" // Ensure "Payment Terms" is included
+      vendor.paymentTerms || "N/A"
     ]);
 
-    // Adjust table styles
     autoTable(doc, {
       startY: 30,
       head: tableHeaders,
       body: tableData,
       theme: "grid",
-      styles: { fontSize: 10, cellPadding: 4, valign: "middle", overflow: "linebreak" },
+      styles: { fontSize: 12, cellPadding: 5 },
       headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold" },
-      alternateRowStyles: { fillColor: [240, 240, 240] },
-      columnStyles: {
-        0: { cellWidth: 30 }, // Vendor Name
-        1: { cellWidth: 25 }, // Contact Name
-        2: { cellWidth: 40 }, // Email
-        3: { cellWidth: 30 }, // Services Provided
-        4: { cellWidth: 40 }, // Pricing Details
-        5: { cellWidth: 30 }  // Payment Terms - Adjusted width
-      },
-      margin: { left: 10, right: 10 } // Ensure content fits within the page
+      alternateRowStyles: { fillColor: [240, 240, 240] }
     });
 
-    doc.save("Vendor_Management_Report.pdf");
+    doc.save("Filtered_Vendor_Report.pdf");
   };
 
   const filteredVendors = vendors.filter((vendor) =>
@@ -142,30 +127,29 @@ const VendorList = () => {
       ) : (
         filteredVendors.map((vendor) => (
           <div key={vendor._id} className="card mb-3 shadow-sm">
-          <div className="card-body d-flex justify-content-between align-items-center">
-            <div>
-              <h5 className="card-title">{vendor.vendorName || "N/A"}</h5>
-              <p className="card-text">Contact: {vendor.contactName || "N/A"}</p>
-              <p className="card-text">Email: {vendor.email || "N/A"}</p>
-              <p className="card-text">Services: {Array.isArray(vendor.servicesProvided) && vendor.servicesProvided.length > 0 ? vendor.servicesProvided.join(", ") : "N/A"}</p>
-              <p className="card-text">Pricing: {vendor.pricingDetails || "N/A"}</p>
-              <p className="card-text">Payment Terms: {vendor.paymentTerms || "N/A"}</p>
-            </div>
-            <div>
-              <button onClick={() => handleUpdate(vendor._id)} className="btn btn-primary me-2">
-                Update
-              </button>
-              <button onClick={() => handleDelete(vendor._id)} className="btn btn-danger">
-                Delete
-              </button>
+            <div className="card-body d-flex justify-content-between align-items-center">
+              <div>
+                <h5 className="card-title">{vendor.vendorName || "N/A"}</h5>
+                <p className="card-text">Contact: {vendor.contactName || "N/A"}</p>
+                <p className="card-text">Email: {vendor.email || "N/A"}</p>
+                <p className="card-text">Services: {Array.isArray(vendor.servicesProvided) ? vendor.servicesProvided.join(", ") : "N/A"}</p>
+                <p className="card-text">Pricing: {vendor.pricingDetails || "N/A"}</p>
+                <p className="card-text">Payment Terms: {vendor.paymentTerms || "N/A"}</p>
+              </div>
+              <div>
+                <button onClick={() => handleUpdate(vendor._id)} className="btn btn-primary me-2">
+                  Update
+                </button>
+                <button onClick={() => handleDelete(vendor._id)} className="btn btn-danger">
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
-        </div>
         ))
       )}
     </div>
   );
 };
-
 
 export default VendorList;

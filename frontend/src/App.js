@@ -9,9 +9,10 @@ import "./Components/input.css";
 import Teds from "./Components/Teds"; // Import the Teds component
 import EventsList from "./Components/EventsList"; // Import the EventsList component
 
-import Vendor from "./Components/vendor"; // Corrected import name
-import VendorsList from "./Components/VendorList"; // Import the VendorsList component
-import UpdateVendor from "./Components/UpdateVendor"; // Adjust the path if needed
+import Vendor from "./Components/Vendor/vendor"; // Corrected import name
+import VendorsList from "./Components/Vendor/VendorList"; // Import the VendorsList component
+import UpdateVendor from "./Components/Vendor/UpdateVendor"; // Adjust the path if needed
+
 import Staff from "./Components/Staff/Staff"; // Import the Staff component
 import StaffList from "./Components/Staff/StaffList"; // Import the StaffList component
 import UpdateStaff from "./Components/Staff/UpdateStaff"; // Import the UpdateStaff component
