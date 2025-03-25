@@ -1,17 +1,17 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import UpdateEvent from "./Components/UpdateEvent";
+import UpdateEvent from "./Components/event/UpdateEvent";
 import "./Components/input.css";  
 
 
 
-import Teds from "./Components/Teds"; // Import the Teds component
-import EventsList from "./Components/EventsList"; // Import the EventsList component
+import Teds from "./Components/event/Teds"; // Import the Teds component
+import EventsList from "./Components/event/EventsList"; // Import the EventsList component
 
-import Vendor from "./Components/vendor"; // Corrected import name
-import VendorsList from "./Components/VendorList"; // Import the VendorsList component
-import UpdateVendor from "./Components/UpdateVendor"; // Adjust the path if needed
+import Vendor from "./Components/vendor/vendor"; 
+import VendorsList from "./Components/vendor/VendorList"; // Import the VendorsList component
+import UpdateVendor from "./Components/vendor/updateVendor"; // Adjust the path if needed
 
 
 function App() {
