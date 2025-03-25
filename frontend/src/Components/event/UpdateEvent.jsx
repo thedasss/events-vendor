@@ -1,45 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Box, Button, FormControl, Input, InputLabel, Typography, Grid, FormHelperText } from "@mui/material";
-
-const titleSx = {
-  fontSize: "25px",
-  color: "black",
-  fontFamily: "Arvo",
-  fontWeight: "bold",
-  marginTop: "4px",
-};
-
-const formSX = {
-  width: "100%",
-  padding: "25px 20px",
-  marginTop: "10px",
-};
-
-const label = {
-  color: "#26bb3a",
-  fontSize: "20px",
-  fontFamily: "Arvo",
-};
-
-const boxSX = {
-  bgcolor: "#FFFFFF",
-  width: "550px",
-  borderRadius: "25px",
-  textAlign: "center",
-  px: "10px",
-  padding: "5px 18px",
-};
-
-const inputSx = {
-  color: "#000000",
-  fontSize: "16px",
-  fontFamily: "Arvo",
-  height: "40px",
-  marginTop: "10px",
-};
+import "tailwindcss/tailwind.css";
 
 const UpdateEvent = () => {
   const { id } = useParams();
@@ -71,27 +33,20 @@ const UpdateEvent = () => {
 
   const validateForm = () => {
     let validationErrors = {};
-    
     if (!eventData.eventType.trim()) {
       validationErrors.eventType = "Event type is required";
     }
-    
     if (!eventData.eventDate) {
       validationErrors.eventDate = "Event date is required";
     } else if (new Date(eventData.eventDate) < new Date()) {
       validationErrors.eventDate = "Event date must be in the future";
     }
-    
-    if (!eventData.budget) {
-      validationErrors.budget = "Budget is required";
-    } else if (isNaN(eventData.budget) || eventData.budget <= 0) {
+    if (!eventData.budget || isNaN(eventData.budget) || eventData.budget <= 0) {
       validationErrors.budget = "Budget must be a positive number";
     }
-    
     if (!eventData.venue.trim()) {
       validationErrors.venue = "Venue is required";
     }
-
     setErrors(validationErrors);
     return Object.keys(validationErrors).length === 0;
   };
@@ -106,101 +61,95 @@ const UpdateEvent = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
     if (!validateForm()) return;
-  
     try {
       await axios.put(`http://localhost:3000/api/events/${id}`, eventData);
       setMessage("✅ Event updated successfully!");
-      setTimeout(() => navigate("/events"), 1500); // Navigate to the events page after 1.5 seconds
+      setTimeout(() => navigate("/events"), 1500);
     } catch (err) {
       setError("❌ Error updating event: " + err.message);
     }
   };
-  
 
-  if (loading) return <p>Loading event details...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) return <p className="text-center text-gray-500">Loading event details...</p>;
+  if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
   return (
-    <Box sx={boxSX} className="container mt-5 p-4 bg-white rounded-lg shadow-lg">
-      <Typography sx={titleSx}>Update Event</Typography>
-      {message && <p className="container flex justify-between items-start mr-20 mb-10">{message}</p>}
-      <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <FormControl sx={formSX} error={!!errors.eventType}>
-              <InputLabel style={label}>Event Type</InputLabel>
-              <Input
-                style={inputSx}
-                name="eventType"
-                value={eventData.eventType}
-                onChange={handleChange}
-                required
-              />
-              {errors.eventType && <FormHelperText>{errors.eventType}</FormHelperText>}
-            </FormControl>
+    <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md mt-10">
+      <h2 className="text-2xl font-semibold text-center text-gray-800 mb-4">Update Event</h2>
+      {message && <p className="text-green-500 text-center font-medium mb-4">{message}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-gray-700 font-medium">Event Type:</label>
+          <select
+            name="eventType"
+            value={eventData.eventType}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-500"
+          >
+            <option value="">Select Event Type</option>
+            <option value="wedding">Wedding</option>
+            <option value="corporate">Corporate Event</option>
+            <option value="birthday">Birthday Party</option>
+            <option value="conference">Conference</option>
+            <option value="other">Other</option>
+          </select>
+          {errors.eventType && <p className="text-red-500 text-sm">{errors.eventType}</p>}
+        </div>
 
-            <FormControl sx={formSX} error={!!errors.eventDate}>
-              <InputLabel style={label}>Event Date</InputLabel>
-              <Input
-                style={inputSx}
-                type="date"
-                name="eventDate"
-                value={eventData.eventDate}
-                onChange={handleChange}
-                required
-              />
-              {errors.eventDate && <FormHelperText>{errors.eventDate}</FormHelperText>}
-            </FormControl>
-          </Grid>
+        <div>
+          <label className="block text-gray-700 font-medium">Event Date:</label>
+          <input
+            type="date"
+            name="eventDate"
+            value={eventData.eventDate}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-500"
+          />
+          {errors.eventDate && <p className="text-red-500 text-sm">{errors.eventDate}</p>}
+        </div>
 
-          <Grid item xs={6}>
-            <FormControl sx={formSX} error={!!errors.budget}>
-              <InputLabel style={label}>Budget</InputLabel>
-              <Input
-                style={inputSx}
-                type="number"
-                name="budget"
-                value={eventData.budget}
-                onChange={handleChange}
-                required
-              />
-              {errors.budget && <FormHelperText>{errors.budget}</FormHelperText>}
-            </FormControl>
+        <div>
+          <label className="block text-gray-700 font-medium">Budget ($):</label>
+          <input
+            type="number"
+            name="budget"
+            value={eventData.budget}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-500"
+          />
+          {errors.budget && <p className="text-red-500 text-sm">{errors.budget}</p>}
+        </div>
 
-            <FormControl sx={formSX} error={!!errors.venue}>
-              <InputLabel style={label}>Venue</InputLabel>
-              <Input
-                style={inputSx}
-                name="venue"
-                value={eventData.venue}
-                onChange={handleChange}
-                required
-              />
-              {errors.venue && <FormHelperText>{errors.venue}</FormHelperText>}
-            </FormControl>
-          </Grid>
-        </Grid>
+        <div>
+          <label className="block text-gray-700 font-medium">Venue:</label>
+          <input
+            type="text"
+            name="venue"
+            value={eventData.venue}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-500"
+          />
+          {errors.venue && <p className="text-red-500 text-sm">{errors.venue}</p>}
+        </div>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-          <Button
-            sx={{ fontSize: "12px", bgcolor: "red", fontWeight: "bold", width: '150px', height: '40px' }}
-            variant="contained"
+        <div className="flex justify-between">
+          <button
+            type="button"
             onClick={() => navigate("/")}
+            className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
           >
             Cancel
-          </Button>
-
-          <Button
-            sx={{ fontSize: "12px", bgcolor: "green", fontWeight: "bold", width: '150px', height: '40px' }}
-            variant="contained"
-            type="submit">
-            UPDATE EVENT
-          </Button>
-        </Box>
+          </button>
+          <button
+            type="submit"
+            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+          >
+            Update Event
+          </button>
+        </div>
       </form>
-    </Box>
+    </div>
   );
 };
 

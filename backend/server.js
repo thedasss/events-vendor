@@ -7,6 +7,7 @@ dotenv.config();
 
 const eventRoutes = require('./routes/eventRoutes');
 const vendorRoutes = require('./routes/vendorRoutes');
+const staffRoutes = require('./routes/staffRoutes');
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(cors());
 // Routes
 app.use('/api/events', eventRoutes);
 app.use('/api/vendors', vendorRoutes);
+app.use('/api/staff', staffRoutes);
 
 // Database Connection
 mongoose
