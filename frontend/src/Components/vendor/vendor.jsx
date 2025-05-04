@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { User, Phone, Mail, MapPin, Package, CreditCard, DollarSign, UserCheck } from "lucide-react";
 
 const Vendor = () => {
   const [vendorData, setVendorData] = useState({
@@ -69,153 +70,172 @@ const Vendor = () => {
   };
 
   return (
-    <div className="container mx-auto mt-5 p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-center text-2xl font-semibold mb-4">Vendor Registration</h2>
-      {message && <p className="text-center text-green-500 font-bold">{message}</p>}
-      <form onSubmit={handleSubmit}>
-        {/* Vendor Name */}
-        <div className="mb-4">
-          <label className="block">Vendor Name:</label>
-          <input
-            type="text"
-            name="vendorName"
-            value={vendorData.vendorName}
-            onChange={handleChange}
-            className="w-full border px-3 py-2"
-          />
-        </div>
-
-        {/* Contact Person */}
-        <div className="mb-4">
-          <label className="block">Contact Person:</label>
-          <input
-            type="text"
-            name="contactPerson"
-            value={vendorData.contactPerson}
-            onChange={handleChange}
-            className="w-full border px-3 py-2"
-          />
-        </div>
-
-        {/* Contact Number */}
-        <div className="mb-4">
-          <label className="block">Contact Number:</label>
-          <input
-            type="text"
-            name="contactNumber"
-            value={vendorData.contactNumber}
-            onChange={handleChange}
-            className="w-full border px-3 py-2"
-          />
-        </div>
-
-        {/* Email */}
-        <div className="mb-4">
-          <label className="block">Email:</label>
-          <input
-            type="email"
-            name="email"
-            value={vendorData.email}
-            onChange={handleChange}
-            className="w-full border px-3 py-2"
-          />
-        </div>
-
-        {/* Address */}
-        <div className="mb-4">
-          <label className="block">Address:</label>
-          <input
-            type="text"
-            name="address"
-            value={vendorData.address}
-            onChange={handleChange}
-            className="w-full border px-3 py-2"
-          />
-        </div>
-
-        {/* Service Provided */}
-        <div className="mb-4">
-          <label className="block">Service Provided:</label>
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                name="serviceType"
-                value="Delivery"
-                checked={vendorData.serviceType.includes("Delivery")}
-                onChange={handleChange}
-              />{" "}
-              Delivery
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="serviceType"
-                value="Repair"
-                checked={vendorData.serviceType.includes("Repair")}
-                onChange={handleChange}
-              />{" "}
-              Repair
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="serviceType"
-                value="Installation"
-                checked={vendorData.serviceType.includes("Installation")}
-                onChange={handleChange}
-              />{" "}
-              Installation
-            </label>
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white rounded-xl shadow-xl overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-8">
+            <h2 className="text-center text-3xl font-bold text-white">Vendor Registration</h2>
+            <p className="mt-2 text-center text-blue-100">Join our network of trusted service providers</p>
           </div>
-        </div>
 
-        {/* Payment Terms */}
-        <div className="mb-4">
-          <label className="block">Payment Terms:</label>
-          <select
-            name="paymentTerms"
-            value={vendorData.paymentTerms}
-            onChange={handleChange}
-            className="w-full border px-3 py-2"
-          >
-            <option value="">Select Payment Term</option>
-            <option value="Net 30">Net 30</option>
-            <option value="Net 60">Net 60</option>
-            <option value="Prepaid">Prepaid</option>
-          </select>
-        </div>
+          {/* Success Message */}
+          {message && (
+            <div className="bg-green-50 border-l-4 border-green-500 p-4 m-6">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-green-800">{message}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
-        {/* Pricing Details */}
-        <div className="mb-4">
-          <label className="block">Pricing Details:</label>
-          <input
-            type="text"
-            name="pricingDetails"
-            value={vendorData.pricingDetails}
-            onChange={handleChange}
-            className="w-full border px-3 py-2"
-          />
-        </div>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="px-6 py-8 space-y-6">
+            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+              {/* Vendor Name */}
+              <InputField
+                icon={<User className="h-5 w-5 text-gray-400" />}
+                label="Vendor Name"
+                name="vendorName"
+                placeholder="Enter your company name"
+                value={vendorData.vendorName}
+                onChange={handleChange}
+              />
 
-        {/* Contact Name */}
-        <div className="mb-4">
-          <label className="block">Contact Name:</label>
-          <input
-            type="text"
-            name="contactName"
-            value={vendorData.contactName}
-            onChange={handleChange}
-            className="w-full border px-3 py-2"
-          />
-        </div>
+              {/* Contact Person */}
+              <InputField
+                icon={<UserCheck className="h-5 w-5 text-gray-400" />}
+                label="Contact Person"
+                name="contactPerson"
+                placeholder="Primary contact name"
+                value={vendorData.contactPerson}
+                onChange={handleChange}
+              />
 
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-          Submit
-        </button>
-      </form>
+              {/* Alternate Contact */}
+              <InputField
+                icon={<UserCheck className="h-5 w-5 text-gray-400" />}
+                label="Alternate Contact"
+                name="contactName"
+                placeholder="Secondary contact name"
+                value={vendorData.contactName}
+                onChange={handleChange}
+              />
+
+              {/* Contact Number */}
+              <InputField
+                icon={<Phone className="h-5 w-5 text-gray-400" />}
+                label="Contact Number"
+                name="contactNumber"
+                placeholder="(123) 456-7890"
+                value={vendorData.contactNumber}
+                onChange={handleChange}
+              />
+
+              {/* Email */}
+              <InputField
+                icon={<Mail className="h-5 w-5 text-gray-400" />}
+                label="Email Address"
+                name="email"
+                placeholder="email@company.com"
+                value={vendorData.email}
+                onChange={handleChange}
+              />
+
+              {/* Address */}
+              <InputField
+                icon={<MapPin className="h-5 w-5 text-gray-400" />}
+                label="Business Address"
+                name="address"
+                placeholder="Full address"
+                value={vendorData.address}
+                onChange={handleChange}
+                colSpan
+              />
+
+              {/* Service Types */}
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-3">Services Provided</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-4 gap-x-6">
+                  {["Delivery", "Repair", "Installation"].map((service) => (
+                    <label key={service} className="flex items-center text-sm text-gray-700">
+                      <input
+                        type="checkbox"
+                        name="serviceType"
+                        value={service}
+                        checked={vendorData.serviceType.includes(service)}
+                        onChange={handleChange}
+                        className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-2"
+                      />
+                      {service}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Payment Terms */}
+              <InputField
+                icon={<CreditCard className="h-5 w-5 text-gray-400" />}
+                label="Payment Terms"
+                name="paymentTerms"
+                placeholder="e.g., Net 30"
+                value={vendorData.paymentTerms}
+                onChange={handleChange}
+                colSpan
+              />
+
+              {/* Pricing Details */}
+              <InputField
+                icon={<DollarSign className="h-5 w-5 text-gray-400" />}
+                label="Pricing Details"
+                name="pricingDetails"
+                placeholder="Include brief pricing model"
+                value={vendorData.pricingDetails}
+                onChange={handleChange}
+                colSpan
+              />
+            </div>
+
+            {/* Submit Button */}
+            <div className="text-center">
+              <button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition"
+              >
+                Register Vendor
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };
+
+// Reusable InputField component
+const InputField = ({ icon, label, name, placeholder, value, onChange, colSpan = false }) => (
+  <div className={colSpan ? "sm:col-span-2" : ""}>
+    <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+    <div className="mt-1 relative rounded-md shadow-sm">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        {icon}
+      </div>
+      <input
+        type="text"
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="pl-10 w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        placeholder={placeholder}
+      />
+    </div>
+  </div>
+);
 
 export default Vendor;
