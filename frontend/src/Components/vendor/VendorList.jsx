@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import jsPDF from "jspdf";
+import { FiPrinter } from 'react-icons/fi';
 import autoTable from "jspdf-autotable";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { IoSearch } from "react-icons/io5";
-import { FiPrinter } from "react-icons/fi";
+import { IoSearch, IoPrint } from "react-icons/io5";
+import { User, Phone, Mail, MapPin, Package, CreditCard, DollarSign } from "lucide-react";;
 
 const VendorList = () => {
   const [vendors, setVendors] = useState([]);
@@ -14,34 +14,41 @@ const VendorList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
+  // Fetch vendor data
   useEffect(() => {
-    axios
-      .get("http://localhost:3000/api/vendors")
-      .then((response) => {
-        if (response.data) {
-          console.log("Fetched Vendors:", response.data); // Debugging
-          setVendors(response.data);
-          setLoading(false);
-        } else {
-          setError("No vendors found.");
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching vendors:", err);
-        setError(err.message);
+    const fetchVendors = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/vendors");
+        const data = response.data || [];
+        
+        const normalized = data.map((vendor) => ({
+          ...vendor,
+          serviceType: Array.isArray(vendor.serviceType)
+            ? vendor.serviceType
+            : typeof vendor.serviceType === "string"
+            ? vendor.serviceType.split(",").map(s => s.trim())
+            : [],
+        }));
+        
+        setVendors(normalized);
         setLoading(false);
-      });
-  }, []);
-  
-  const handleDelete = async (id) => {
-    try {
-      if (window.confirm("Are you sure you want to delete this vendor?")) {
-        await axios.delete(`http://localhost:3000/api/vendors/${id}`);
-        setVendors((prevVendors) => prevVendors.filter((vendor) => vendor._id !== id));
+      } catch (err) {
+        setError("Failed to load vendors: " + err.message);
+        setLoading(false);
       }
-    } catch (err) {
-      alert("Error deleting vendor: " + err.message);
+    };
+
+    fetchVendors();
+  }, []);
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this vendor?")) {
+      try {
+        await axios.delete(`http://localhost:3000/api/vendors/${id}`);
+        setVendors((prev) => prev.filter((v) => v._id !== id));
+      } catch (err) {
+        alert("Error deleting vendor: " + err.message);
+      }
     }
   };
 
@@ -50,11 +57,6 @@ const VendorList = () => {
   };
 
   const generateReport = () => {
-    if (!vendors || vendors.length === 0) {
-      alert("No data available to generate the report.");
-      return;
-    }
-
     const filteredVendors = vendors.filter((vendor) =>
       vendor.vendorName?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -65,143 +67,174 @@ const VendorList = () => {
     }
 
     const doc = new jsPDF();
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-
-    const title = "Vendor Management Report";
-    doc.text(title, doc.internal.pageSize.width / 2, 20, { align: "center" });
-
-    // Add date to the report
-    const today = new Date();
-    const dateStr = today.toLocaleDateString();
-    doc.setFontSize(10);
-    doc.text(`Generated on: ${dateStr}`, doc.internal.pageSize.width - 40, 30);
-
-    const tableHeaders = [["Vendor Name", "Contact Name", "Email", "Services Provided", "Pricing Details", "Payment Terms"]];
-
-    const tableData = filteredVendors.map((vendor) => [
-      vendor.vendorName || "N/A",
-      vendor.contactName || "N/A",
-      vendor.email || "N/A",
-      Array.isArray(vendor.servicesProvided) ? vendor.servicesProvided.join(", ") : "N/A",
-      vendor.pricingDetails || "N/A",
-      vendor.paymentTerms || "N/A"
-    ]);
-
+    doc.text("Vendor Report", 14, 16);
     autoTable(doc, {
-      startY: 40,
-      head: tableHeaders,
-      body: tableData,
-      theme: "grid",
-      styles: { fontSize: 10, cellPadding: 5 },
-      headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold" },
-      alternateRowStyles: { fillColor: [240, 240, 240] }
+      head: [["Vendor Name", "Contact Person", "Contact Number", "Email", "Services", "Payment Terms", "Pricing", "Address"]],
+      body: filteredVendors.map((vendor) => [
+        vendor.vendorName,
+        vendor.contactPerson,
+        vendor.contactNumber,
+        vendor.email,
+        vendor.serviceType.join(", "),
+        vendor.paymentTerms,
+        vendor.pricingDetails,
+        vendor.address,
+      ]),
+      startY: 20,
     });
-
-    doc.save("Vendor_Management_Report.pdf");
+    doc.save("vendor_report.pdf");
   };
 
   const filteredVendors = vendors.filter((vendor) =>
     vendor.vendorName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-[200px]">
-      <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-      <p className="text-gray-600">Loading vendors...</p>
-    </div>
-  );
-  
-  if (error) return (
-    <div className="bg-red-50 border-l-4 border-red-500 p-4 m-4 rounded">
-      <p className="text-red-700">Error: {error}</p>
-    </div>
-  );
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 className="text-2xl font-bold text-blue-600">Vendors List</h2>
-        
-        <div className="relative w-full md:w-1/3">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <IoSearch className="text-gray-400" />
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white rounded-xl shadow-xl overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-8 flex items-center justify-between flex-wrap">
+            <div>
+              <h2 className="text-2xl font-bold text-white">Registered Vendors</h2>
+              <p className="text-blue-100">Manage your vendor network efficiently</p>
+            </div>
+            <div className="mt-4 sm:mt-0 flex gap-4">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <IoSearch className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search vendors..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <button
+                onClick={generateReport}
+                className="flex items-center gap-2 bg-white text-blue-600 hover:bg-blue-50 font-semibold px-4 py-2 rounded-lg shadow transition"
+              >
+                <FiPrinter className="h-5 w-5" /> Generate Report
+              </button>
+            </div>
           </div>
-          <input
-            type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Search vendors"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        
-        <button 
-          onClick={generateReport} 
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-sm hover:shadow"
-        >
-          <FiPrinter /> Generate Report
-        </button>
-      </div>
 
-      {filteredVendors.length === 0 ? (
-        <div className="text-center p-12 bg-gray-50 rounded-lg border border-gray-200">
-          <p className="text-gray-500">No vendors found matching your search criteria.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredVendors.map((vendor) => (
-            <div key={vendor._id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-100">
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-blue-600 mb-4 pb-2 border-b border-gray-100">{vendor.vendorName || "N/A"}</h3>
-                
-                <div className="space-y-3">
-                  <div className="flex">
-                    <span className="font-medium text-gray-600 w-32">Contact:</span>
-                    <span className="text-gray-800">{vendor.contactName || "N/A"}</span>
+          {/* Content */}
+          <div className="px-6 py-8">
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                <p className="mt-2 text-gray-600">Loading vendors...</p>
+              </div>
+            ) : error ? (
+              <div className="bg-red-50 border-l-4 border-red-500 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
                   </div>
-                  
-                  <div className="flex">
-                    <span className="font-medium text-gray-600 w-32">Email:</span>
-                    <span className="text-gray-800 break-all">{vendor.email || "N/A"}</span>
-                  </div>
-                  
-                  <div className="flex">
-                    <span className="font-medium text-gray-600 w-32">Services:</span>
-                    <span className="text-gray-800">{Array.isArray(vendor.servicesProvided) ? vendor.servicesProvided.join(", ") : "N/A"}</span>
-                  </div>
-                  
-                  <div className="flex">
-                    <span className="font-medium text-gray-600 w-32">Pricing:</span>
-                    <span className="text-gray-800">{vendor.pricingDetails || "N/A"}</span>
-                  </div>
-                  
-                  <div className="flex">
-                    <span className="font-medium text-gray-600 w-32">Payment Terms:</span>
-                    <span className="text-gray-800">{vendor.paymentTerms || "N/A"}</span>
+                  <div className="ml-3">
+                    <p className="text-sm text-red-700">{error}</p>
                   </div>
                 </div>
               </div>
-              
-              <div className="flex border-t border-gray-100 bg-gray-50">
-                <button 
-                  onClick={() => handleUpdate(vendor._id)} 
-                  className="flex-1 py-3 text-center text-blue-600 hover:bg-blue-50 font-medium transition-colors duration-200"
-                >
-                  Update
-                </button>
-                <span className="w-px bg-gray-200"></span>
-                <button 
-                  onClick={() => handleDelete(vendor._id)} 
-                  className="flex-1 py-3 text-center text-red-600 hover:bg-red-50 font-medium transition-colors duration-200"
-                >
-                  Delete
-                </button>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Vendor
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <div className="flex items-center">
+                          <User className="h-4 w-4 mr-1" /> Contact
+                        </div>
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <div className="flex items-center">
+                          <Mail className="h-4 w-4 mr-1" /> Email
+                        </div>
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <div className="flex items-center">
+                          <Package className="h-4 w-4 mr-1" /> Services
+                        </div>
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <div className="flex items-center">
+                          <CreditCard className="h-4 w-4 mr-1" /> Payment
+                        </div>
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <div className="flex items-center">
+                          <DollarSign className="h-4 w-4 mr-1" /> Pricing
+                        </div>
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredVendors.map((vendor) => (
+                      <tr key={vendor._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{vendor.vendorName}</div>
+                              <div className="text-sm text-gray-500 flex items-center">
+                                <Phone className="h-3 w-3 mr-1" /> {vendor.contactNumber}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{vendor.contactPerson}</div>
+                          {vendor.contactName && (
+                            <div className="text-sm text-gray-500">Alt: {vendor.contactName}</div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {vendor.email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {vendor.serviceType.join(", ")}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {vendor.paymentTerms}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {vendor.pricingDetails}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => handleUpdate(vendor._id)}
+                            className="text-blue-600 hover:text-blue-900 mr-4"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(vendor._id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </div>
-          ))}
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -18,6 +18,45 @@ const Vendor = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
+  const validateForm = () => {
+    const nameRegex = /^[A-Za-z\s]+$/;
+    const numberRegex = /^\+\d{9,15}$/;
+    const emailRegex = /^[A-Za-z0-9._%+-]+@(gmail\.com|email\.com)$/;
+    const addressRegex = /^No/i;
+    const pricingRegex = /^\d+$/;
+
+    if (!nameRegex.test(vendorData.vendorName)) {
+      setMessage("❌ Vendor Name should be a full string.");
+      return false;
+    }
+    if (!nameRegex.test(vendorData.contactPerson)) {
+      setMessage("❌ Contact Person should be a full string.");
+      return false;
+    }
+    if (vendorData.contactName && !nameRegex.test(vendorData.contactName)) {
+      setMessage("❌ Alternate Contact should be a string.");
+      return false;
+    }
+    if (!numberRegex.test(vendorData.contactNumber)) {
+      setMessage("❌ Contact Number must start with '+' and be 9-15 digits.");
+      return false;
+    }
+    if (!emailRegex.test(vendorData.email)) {
+      setMessage("❌ Email must end with '@gmail.com' or '@email.com'.");
+      return false;
+    }
+    if (!addressRegex.test(vendorData.address)) {
+      setMessage("❌ Business Address must start with 'No'.");
+      return false;
+    }
+    if (!pricingRegex.test(vendorData.pricingDetails)) {
+      setMessage("❌ Pricing Details must be an integer.");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -38,6 +77,8 @@ const Vendor = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
 
     try {
       const response = await fetch('http://localhost:3000/api/vendors', {
@@ -98,62 +139,51 @@ const Vendor = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-6 py-8 space-y-6">
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-              {/* Vendor Name */}
               <InputField
                 icon={<User className="h-5 w-5 text-gray-400" />}
                 label="Vendor Name"
                 name="vendorName"
-                placeholder="Enter your company name"
+                placeholder="  Enter your company name"
                 value={vendorData.vendorName}
                 onChange={handleChange}
               />
-
-              {/* Contact Person */}
               <InputField
                 icon={<UserCheck className="h-5 w-5 text-gray-400" />}
                 label="Contact Person"
                 name="contactPerson"
-                placeholder="Primary contact name"
+                placeholder="  Primary contact name"
                 value={vendorData.contactPerson}
                 onChange={handleChange}
               />
-
-              {/* Alternate Contact */}
               <InputField
                 icon={<UserCheck className="h-5 w-5 text-gray-400" />}
                 label="Alternate Contact"
                 name="contactName"
-                placeholder="Secondary contact name"
+                placeholder="  Secondary contact name"
                 value={vendorData.contactName}
                 onChange={handleChange}
               />
-
-              {/* Contact Number */}
               <InputField
                 icon={<Phone className="h-5 w-5 text-gray-400" />}
                 label="Contact Number"
                 name="contactNumber"
-                placeholder="(123) 456-7890"
+                placeholder="  +94771234567"
                 value={vendorData.contactNumber}
                 onChange={handleChange}
               />
-
-              {/* Email */}
               <InputField
                 icon={<Mail className="h-5 w-5 text-gray-400" />}
                 label="Email Address"
                 name="email"
-                placeholder="email@company.com"
+                placeholder="  email@company.com"
                 value={vendorData.email}
                 onChange={handleChange}
               />
-
-              {/* Address */}
               <InputField
                 icon={<MapPin className="h-5 w-5 text-gray-400" />}
                 label="Business Address"
                 name="address"
-                placeholder="Full address"
+                placeholder="  Full address"
                 value={vendorData.address}
                 onChange={handleChange}
                 colSpan
@@ -180,29 +210,42 @@ const Vendor = () => {
               </div>
 
               {/* Payment Terms */}
-              <InputField
-                icon={<CreditCard className="h-5 w-5 text-gray-400" />}
-                label="Payment Terms"
-                name="paymentTerms"
-                placeholder="e.g., Net 30"
-                value={vendorData.paymentTerms}
-                onChange={handleChange}
-                colSpan
-              />
+              <div className="col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-gray-400" />
+                  Payment Terms
+                </label>
+                <select
+                  name="paymentTerms"
+                  value={vendorData.paymentTerms}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select payment terms</option>
+                  <option value="Net 15">Net 15</option>
+                  <option value="Net 30">Net 30</option>
+                  <option value="Net 60">Net 60</option>
+                  <option value="Due on receipt">Due on receipt</option>
+                  <option value="50% upfront, 50% on delivery">50% upfront, 50% on delivery</option>
+                  <option value="Milestone-based">Milestone-based</option>
+                  <option value="Monthly billing">Monthly billing</option>
+                  <option value="Cash in advance (CIA)">Cash in advance (CIA)</option>
+                  <option value="Cash on delivery (COD)">Cash on delivery (COD)</option>
+                  <option value="End of Month (EOM)">End of Month (EOM)</option>
+                </select>
+              </div>
 
-              {/* Pricing Details */}
               <InputField
                 icon={<DollarSign className="h-5 w-5 text-gray-400" />}
                 label="Pricing Details"
                 name="pricingDetails"
-                placeholder="Include brief pricing model"
+                placeholder="  Include brief pricing model"
                 value={vendorData.pricingDetails}
                 onChange={handleChange}
                 colSpan
               />
             </div>
 
-            {/* Submit Button */}
             <div className="text-center">
               <button
                 type="submit"
@@ -218,7 +261,6 @@ const Vendor = () => {
   );
 };
 
-// Reusable InputField component
 const InputField = ({ icon, label, name, placeholder, value, onChange, colSpan = false }) => (
   <div className={colSpan ? "sm:col-span-2" : ""}>
     <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
