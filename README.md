@@ -146,7 +146,7 @@ Frontend will run on `http://localhost:3000` and communicate with the backend AP
 
 ## ✨ Author
 
-**Your Name**
+**Anupama Perera**
 💻 Full-stack Developer
 📍 Third-year IT undergraduate at SLIIT University
 📧 [thedassilva64@gmail.com]
